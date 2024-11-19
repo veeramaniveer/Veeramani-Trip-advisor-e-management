@@ -1,0 +1,43 @@
+public class FoodOptionTriggerHandler {
+
+    // Method to update hotel information based on food options
+
+    public static void updateHotelInformation(List<Food_Option__c> newFoodOptions, List<Food_Option__c> oldFoodOptions, TriggerOperation operation) {
+
+        Set<Id> hotelIdsToUpdate = new Set<Id>();
+
+
+        // Collect unique Hotel Ids affected by food options changes
+
+        for (Food_Option__c foodOption : newFoodOptions) {
+
+            hotelIdsToUpdate.add(foodOption.Hotel__c);
+
+        }
+
+
+        // Update hotel information based on food options
+
+        List<Hotel__c> hotelsToUpdate = [SELECT Id, Name, TotalFoodOptions__c FROM Hotel__c WHERE Id IN :hotelIdsToUpdate];
+
+
+        for (Hotel__c hotel : hotelsToUpdate) {
+
+            // Recalculate total food options count
+
+            Integer totalFoodOptions = [SELECT COUNT() FROM Food_Option__c WHERE Hotel__c = :hotel.Id];
+
+            hotel.TotalFoodOptions__c = totalFoodOptions;
+
+        }
+
+
+        // Update hotels with new total food options count
+
+        update hotelsToUpdate;
+
+    }
+
+
+
+}
